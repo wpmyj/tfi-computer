@@ -28,7 +28,9 @@ all: tfi.hex lfuse.hex hfuse.hex
 
 .elif ${PLATFORM} == "hosted"
 CC=gcc
-CFLAGS+= -I. -std=c99 -Wall -O0 -g
+CFLAGS+= -I. -std=c99 -Wall -O0 -g 
+CFLAGS+= -finstrument-functions
+CFLAGS+= -finstrument-functions-exclude-function-list=current_time,timespec_to_ticks,clock_gettime,sensors_process,console_process,usart_tx_ready,usart_rx_ready
 CFLAGS+= -D TICKRATE=1000000000 -D_POSIX_C_SOURCE=199309L -DTIMER64 -D_GNU_SOURCE
 LDFLAGS+= -lrt
 all: tfi
@@ -36,11 +38,10 @@ all: tfi
 .endif
 
 
-OBJS=decoder.o util.o tfi.o scheduler.o console.o calculations.o config.o table.o sensors.o platforms/${PLATFORM}.o
-SRCS=decoder.c util.c tfi.c scheduler.c console.c calculations.c config.c table.c sensors.c platforms/${PLATFORM}.c
+OBJS=decoder.o util.o tfi.o scheduler.o console.o calculations.o config.o table.o sensors.o trace.o
 
-tfi: decoder.o util.o tfi.o scheduler.o console.o calculations.o config.o table.o sensors.o platforms/${PLATFORM}.o
-	${CC} ${CFLAGS} -o tfi tfi.o calculations.o scheduler.o console.o decoder.o util.o sensors.o config.o table.o ${PLATFORM}.o  ${LDFLAGS}
+tfi: ${OBJS} platforms/${PLATFORM}.o
+	${CC} ${CFLAGS} -o tfi ${OBJS} ${PLATFORM}.o  ${LDFLAGS}
 
 
 tfi.hex: tfi
