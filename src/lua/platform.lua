@@ -11,9 +11,18 @@ function parse_input_events (path)
 end
 
 function tick(time)
-  if time % 1000 == 800 then
+  if time % 5000 == 300 then
     hosted_trigger1(time)
   end
+  on, off = hosted_get_output()
+  if on ~= 0 or off ~= 0 then
+    print(on, off)
+  end
+end
+
+function set_output(output, value)
+  print(output)
+  print(value)
 end
 
 function tfi_platform_init() 
