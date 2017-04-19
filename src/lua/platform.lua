@@ -10,9 +10,13 @@ function parse_input_events (path)
   return events
 end
 
+triggertime = 200
 function tick(time)
-  if time % 5000 == 300 then
+  if time % 5000 == triggertime then
     hosted_trigger1(time)
+  end
+  if time % 5000 == 0 then
+    triggertime = math.random(200, 600)
   end
   on, off = hosted_get_output()
   if on ~= 0 or off ~= 0 then

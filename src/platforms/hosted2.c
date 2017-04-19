@@ -23,6 +23,7 @@ struct slot {
 size_t max_slots;
 size_t cur_slot = 0;
 size_t cur_buffer = 0;
+sigset_t smask;
 
 timeval_t current_time() {
 	return curtime;
@@ -42,9 +43,17 @@ void disable_event_timer() {
 }
 
 void disable_interrupts() {
+  sigset_t sm;
+  sigemptyset(&sm);
+  sigaddset(&sm, SIGVTALRM);
+  sigprocmask(SIG_BLOCK, &sm, NULL);
 }
   
 void enable_interrupts() {
+  sigset_t sm;
+  sigemptyset(&sm);
+  sigaddset(&sm, SIGVTALRM);
+  sigprocmask(SIG_UNBLOCK, &sm, NULL);
 }
 
 int interrupts_enabled() {
@@ -148,10 +157,9 @@ static void hosted_platform_timer() {
   lua_pcall(lstate, 1, 0, 0);
 }
 
-void platform_init() {
+void platform_init(int argc, char *argv[]) {
 
   /* Set up signal handling */
-  sigset_t smask;
   sigemptyset(&smask);
   struct sigaction sa = {
     .sa_handler = hosted_platform_timer,
